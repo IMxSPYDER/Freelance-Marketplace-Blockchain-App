@@ -2,11 +2,9 @@
 pragma solidity ^0.8.0;
 
 contract FreelanceMarketplace {
-    
-    // Define a structure for Job
+
     struct Job {
-        uint jobId;
-        address payable jobPoster;
+        address jobPoster;
         string title;
         string shortDescription;
         string detailedDescription;
@@ -16,11 +14,11 @@ contract FreelanceMarketplace {
         string workUrl;
         bool isCompleted;
         bool isApproved;
+        address[] applicants;
+        uint256[] applicationIndexes;
     }
 
-    // Define a structure for Job Application by Freelancer
     struct Application {
-        uint jobId;
         address applicant;
         string name;
         string previousWorkLink;
@@ -29,59 +27,51 @@ contract FreelanceMarketplace {
         bool isAccepted;
     }
 
-    // Store all jobs
-    Job[] public jobs;
+    mapping(uint256 => Job) public jobs;
+    mapping(uint256 => Application[]) public jobApplications;
+    
+    uint256 public numberOfJobs = 0;
 
-    // Mapping to track all applications for each jobId
-    mapping(uint => Application[]) public jobApplications;
-
-    // Events to emit
-    event JobPosted(uint jobId, address indexed jobPoster);
-    event JobApplied(uint jobId, address indexed applicant);
-    event WorkReviewed(uint jobId, address indexed applicant, bool isAccepted);
-
-    // Modifier to ensure only the job poster can review applications
-    modifier onlyJobPoster(uint jobId) {
-        require(jobs[jobId].jobPoster == msg.sender, "Not the job poster");
-        _;
-    }
-
-    // Function to post a job with payment
+    // Function to post a job with a minimum budget of 0.001 ETH
     function postJob(
         string memory _title,
         string memory _shortDescription,
         string memory _detailedDescription,
-        uint256 _deadline,
         uint256 _budget,
+        uint256 _deadline,
         string memory _image,
         string memory _workUrl
-    ) external payable {
-        // require(_budget > -1, "Budget should be greater than zero");
+    ) public payable returns (uint256) {
+        // Ensure the budget is at least 0.001 ETH (1 * 10^15 wei)
+        require(_budget >= 0.001 ether, "Budget must be at least 0.001 ETH");
         require(_deadline > block.timestamp, "Deadline must be in the future");
 
-        jobs.push(Job({
-            jobId: jobs.length,
-            jobPoster: payable(msg.sender),
-            title: _title,
-            shortDescription: _shortDescription,
-            detailedDescription: _detailedDescription,
-            budget: _budget,
-            deadline: _deadline,
-            image: _image,
-            workUrl: _workUrl,
-            isCompleted: false,
-            isApproved: false
-        }));
+        Job storage newJob = jobs[numberOfJobs];
+        newJob.jobPoster = msg.sender;
+        newJob.title = _title;
+        newJob.shortDescription = _shortDescription;
+        newJob.detailedDescription = _detailedDescription;
+        newJob.budget = _budget;
+        newJob.deadline = _deadline;
+        newJob.image = _image;
+        newJob.workUrl = _workUrl;
+        newJob.isCompleted = false;
+        newJob.isApproved = false;
 
-        emit JobPosted(jobs.length - 1, msg.sender);
+        numberOfJobs++;
+        return numberOfJobs - 1;
     }
 
-    // Function for a freelancer to apply to a job
-    function applyForJob(uint _jobId, string memory _name, string memory _previousWorkLink, string memory _projectLink) external {
-        require(_jobId < jobs.length, "Invalid job ID");
+    // Function to apply for a job
+    function applyForJob(
+        uint256 _jobId,
+        string memory _name,
+        string memory _previousWorkLink,
+        string memory _projectLink
+    ) public {
+        require(_jobId < numberOfJobs, "Invalid job ID");
 
         Application memory application = Application({
-            jobId: _jobId,
             applicant: msg.sender,
             name: _name,
             previousWorkLink: _previousWorkLink,
@@ -91,14 +81,20 @@ contract FreelanceMarketplace {
         });
 
         jobApplications[_jobId].push(application);
-
-        emit JobApplied(_jobId, msg.sender);
+        jobs[_jobId].applicants.push(msg.sender);
+        jobs[_jobId].applicationIndexes.push(jobApplications[_jobId].length - 1);
     }
 
-    // Function for job poster to review the work and approve/deny it
-    function reviewWork(uint _jobId, uint _applicationIndex, bool _isAccepted, string memory _workUrl) external onlyJobPoster(_jobId) {
-        require(_jobId < jobs.length, "Invalid job ID");
+    // Function to review an applicant's work
+    function reviewWork(
+        uint256 _jobId,
+        uint256 _applicationIndex,
+        bool _isAccepted,
+        string memory _workUrl
+    ) public {
+        require(_jobId < numberOfJobs, "Invalid job ID");
         require(_applicationIndex < jobApplications[_jobId].length, "Invalid application index");
+        require(jobs[_jobId].jobPoster == msg.sender, "Only job poster can review");
 
         Application storage application = jobApplications[_jobId][_applicationIndex];
         require(!application.isReviewed, "Application already reviewed");
@@ -109,56 +105,40 @@ contract FreelanceMarketplace {
             jobs[_jobId].isApproved = true;
             application.isAccepted = true;
 
-            // Transfer payment to the freelancer
+            // Transfer payment to freelancer (assuming budget is available)
             (bool sent, ) = payable(application.applicant).call{value: jobs[_jobId].budget}("");
-            require(sent, "Failed to send Ether");
-
-            // Delete the application by swapping and popping
-            removeApplication(_jobId, _applicationIndex);
+            require(sent, "Payment failed");
         }
 
         application.isReviewed = true;
-
-        emit WorkReviewed(_jobId, application.applicant, _isAccepted);
-    }
-
-    // Helper function to remove an application by index
-    function removeApplication(uint _jobId, uint _applicationIndex) internal {
-        uint lastIndex = jobApplications[_jobId].length - 1;
-        
-        // If the application to remove is not the last one, swap it with the last
-        if (_applicationIndex != lastIndex) {
-            jobApplications[_jobId][_applicationIndex] = jobApplications[_jobId][lastIndex];
-        }
-
-        // Remove the last element
-        jobApplications[_jobId].pop();
     }
 
     // Function to get all jobs
-    function getJobs() external view returns (Job[] memory) {
-        return jobs;
+    function getJobs() public view returns (Job[] memory) {
+        Job[] memory allJobs = new Job[](numberOfJobs);
+        for (uint256 i = 0; i < numberOfJobs; i++) {
+            allJobs[i] = jobs[i];
+        }
+        return allJobs;
     }
 
     // Function to get applications for a specific job
-    function getApplications(uint _jobId) external view returns (Application[] memory) {
+    function getApplications(uint256 _jobId) public view returns (Application[] memory) {
         return jobApplications[_jobId];
     }
 
-    // Function to get all jobs posted by a specific user
-    function getJobsByPoster(address _jobPoster) external view returns (Job[] memory) {
-        uint jobCount = 0;
-
-        for (uint i = 0; i < jobs.length; i++) {
+    // Function to get all jobs posted by a specific user (job poster)
+    function getJobsByPoster(address _jobPoster) public view returns (Job[] memory) {
+        uint256 jobCount = 0;
+        for (uint256 i = 0; i < numberOfJobs; i++) {
             if (jobs[i].jobPoster == _jobPoster) {
                 jobCount++;
             }
         }
 
         Job[] memory userJobs = new Job[](jobCount);
-        uint index = 0;
-
-        for (uint i = 0; i < jobs.length; i++) {
+        uint256 index = 0;
+        for (uint256 i = 0; i < numberOfJobs; i++) {
             if (jobs[i].jobPoster == _jobPoster) {
                 userJobs[index] = jobs[i];
                 index++;
@@ -169,24 +149,22 @@ contract FreelanceMarketplace {
     }
 
     // Function to get all jobs a freelancer has applied to
-    function getAppliedJobs(address _applicant) external view returns (Application[] memory) {
-        uint count = 0;
-
-        for (uint i = 0; i < jobs.length; i++) {
-            for (uint j = 0; j < jobApplications[i].length; j++) {
+    function getAppliedJobs(address _applicant) public view returns (Job[] memory) {
+        uint256 appliedJobCount = 0;
+        for (uint256 i = 0; i < numberOfJobs; i++) {
+            for (uint256 j = 0; j < jobApplications[i].length; j++) {
                 if (jobApplications[i][j].applicant == _applicant) {
-                    count++;
+                    appliedJobCount++;
                 }
             }
         }
 
-        Application[] memory appliedJobs = new Application[](count);
-        uint index = 0;
-
-        for (uint i = 0; i < jobs.length; i++) {
-            for (uint j = 0; j < jobApplications[i].length; j++) {
+        Job[] memory appliedJobs = new Job[](appliedJobCount);
+        uint256 index = 0;
+        for (uint256 i = 0; i < numberOfJobs; i++) {
+            for (uint256 j = 0; j < jobApplications[i].length; j++) {
                 if (jobApplications[i][j].applicant == _applicant) {
-                    appliedJobs[index] = jobApplications[i][j];
+                    appliedJobs[index] = jobs[i];
                     index++;
                 }
             }
@@ -195,6 +173,29 @@ contract FreelanceMarketplace {
         return appliedJobs;
     }
 
-    // Allow the contract to receive ETH
+    function getJobBudget(uint256 jobId) public view returns (uint256) {
+    return jobs[jobId].budget;  // Assuming 'jobs' is a mapping containing the job details
+    }
+
+    function sendPaymentToApplicant(uint256 _jobId, uint256 _applicationIndex) public payable {
+        require(_jobId < numberOfJobs, "Invalid job ID");
+        require(_applicationIndex < jobApplications[_jobId].length, "Invalid application index");
+
+        Job storage job = jobs[_jobId];
+        Application storage application = jobApplications[_jobId][_applicationIndex];
+
+        require(job.jobPoster == msg.sender, "Only job poster can send payment");
+        require(application.isAccepted, "Application is not accepted");
+
+        uint256 amount = job.budget;
+        require(amount > 0, "Invalid payment amount");
+
+        // Transfer the payment to the freelancer's address
+        (bool sent, ) = payable(application.applicant).call{value: amount}("");
+        require(sent, "Payment failed");
+    }
+
+
+    // Function to allow the contract to receive Ether
     receive() external payable {}
-} 
+}

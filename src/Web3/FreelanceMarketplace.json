@@ -1,68 +1,5 @@
 [
 	{
-		"anonymous": false,
-		"inputs": [
-			{
-				"indexed": false,
-				"internalType": "uint256",
-				"name": "jobId",
-				"type": "uint256"
-			},
-			{
-				"indexed": true,
-				"internalType": "address",
-				"name": "applicant",
-				"type": "address"
-			}
-		],
-		"name": "JobApplied",
-		"type": "event"
-	},
-	{
-		"anonymous": false,
-		"inputs": [
-			{
-				"indexed": false,
-				"internalType": "uint256",
-				"name": "jobId",
-				"type": "uint256"
-			},
-			{
-				"indexed": true,
-				"internalType": "address",
-				"name": "jobPoster",
-				"type": "address"
-			}
-		],
-		"name": "JobPosted",
-		"type": "event"
-	},
-	{
-		"anonymous": false,
-		"inputs": [
-			{
-				"indexed": false,
-				"internalType": "uint256",
-				"name": "jobId",
-				"type": "uint256"
-			},
-			{
-				"indexed": true,
-				"internalType": "address",
-				"name": "applicant",
-				"type": "address"
-			},
-			{
-				"indexed": false,
-				"internalType": "bool",
-				"name": "isAccepted",
-				"type": "bool"
-			}
-		],
-		"name": "WorkReviewed",
-		"type": "event"
-	},
-	{
 		"inputs": [
 			{
 				"internalType": "uint256",
@@ -102,11 +39,6 @@
 		"outputs": [
 			{
 				"components": [
-					{
-						"internalType": "uint256",
-						"name": "jobId",
-						"type": "uint256"
-					},
 					{
 						"internalType": "address",
 						"name": "applicant",
@@ -159,62 +91,7 @@
 			{
 				"components": [
 					{
-						"internalType": "uint256",
-						"name": "jobId",
-						"type": "uint256"
-					},
-					{
 						"internalType": "address",
-						"name": "applicant",
-						"type": "address"
-					},
-					{
-						"internalType": "string",
-						"name": "name",
-						"type": "string"
-					},
-					{
-						"internalType": "string",
-						"name": "previousWorkLink",
-						"type": "string"
-					},
-					{
-						"internalType": "string",
-						"name": "projectLink",
-						"type": "string"
-					},
-					{
-						"internalType": "bool",
-						"name": "isReviewed",
-						"type": "bool"
-					},
-					{
-						"internalType": "bool",
-						"name": "isAccepted",
-						"type": "bool"
-					}
-				],
-				"internalType": "struct FreelanceMarketplace.Application[]",
-				"name": "",
-				"type": "tuple[]"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [],
-		"name": "getJobs",
-		"outputs": [
-			{
-				"components": [
-					{
-						"internalType": "uint256",
-						"name": "jobId",
-						"type": "uint256"
-					},
-					{
-						"internalType": "address payable",
 						"name": "jobPoster",
 						"type": "address"
 					},
@@ -262,6 +139,110 @@
 						"internalType": "bool",
 						"name": "isApproved",
 						"type": "bool"
+					},
+					{
+						"internalType": "address[]",
+						"name": "applicants",
+						"type": "address[]"
+					},
+					{
+						"internalType": "uint256[]",
+						"name": "applicationIndexes",
+						"type": "uint256[]"
+					}
+				],
+				"internalType": "struct FreelanceMarketplace.Job[]",
+				"name": "",
+				"type": "tuple[]"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "jobId",
+				"type": "uint256"
+			}
+		],
+		"name": "getJobBudget",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "getJobs",
+		"outputs": [
+			{
+				"components": [
+					{
+						"internalType": "address",
+						"name": "jobPoster",
+						"type": "address"
+					},
+					{
+						"internalType": "string",
+						"name": "title",
+						"type": "string"
+					},
+					{
+						"internalType": "string",
+						"name": "shortDescription",
+						"type": "string"
+					},
+					{
+						"internalType": "string",
+						"name": "detailedDescription",
+						"type": "string"
+					},
+					{
+						"internalType": "uint256",
+						"name": "budget",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "deadline",
+						"type": "uint256"
+					},
+					{
+						"internalType": "string",
+						"name": "image",
+						"type": "string"
+					},
+					{
+						"internalType": "string",
+						"name": "workUrl",
+						"type": "string"
+					},
+					{
+						"internalType": "bool",
+						"name": "isCompleted",
+						"type": "bool"
+					},
+					{
+						"internalType": "bool",
+						"name": "isApproved",
+						"type": "bool"
+					},
+					{
+						"internalType": "address[]",
+						"name": "applicants",
+						"type": "address[]"
+					},
+					{
+						"internalType": "uint256[]",
+						"name": "applicationIndexes",
+						"type": "uint256[]"
 					}
 				],
 				"internalType": "struct FreelanceMarketplace.Job[]",
@@ -285,12 +266,7 @@
 			{
 				"components": [
 					{
-						"internalType": "uint256",
-						"name": "jobId",
-						"type": "uint256"
-					},
-					{
-						"internalType": "address payable",
+						"internalType": "address",
 						"name": "jobPoster",
 						"type": "address"
 					},
@@ -338,6 +314,16 @@
 						"internalType": "bool",
 						"name": "isApproved",
 						"type": "bool"
+					},
+					{
+						"internalType": "address[]",
+						"name": "applicants",
+						"type": "address[]"
+					},
+					{
+						"internalType": "uint256[]",
+						"name": "applicationIndexes",
+						"type": "uint256[]"
 					}
 				],
 				"internalType": "struct FreelanceMarketplace.Job[]",
@@ -363,11 +349,6 @@
 		],
 		"name": "jobApplications",
 		"outputs": [
-			{
-				"internalType": "uint256",
-				"name": "jobId",
-				"type": "uint256"
-			},
 			{
 				"internalType": "address",
 				"name": "applicant",
@@ -413,12 +394,7 @@
 		"name": "jobs",
 		"outputs": [
 			{
-				"internalType": "uint256",
-				"name": "jobId",
-				"type": "uint256"
-			},
-			{
-				"internalType": "address payable",
+				"internalType": "address",
 				"name": "jobPoster",
 				"type": "address"
 			},
@@ -472,6 +448,19 @@
 		"type": "function"
 	},
 	{
+		"inputs": [],
+		"name": "numberOfJobs",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
 		"inputs": [
 			{
 				"internalType": "string",
@@ -490,12 +479,12 @@
 			},
 			{
 				"internalType": "uint256",
-				"name": "_deadline",
+				"name": "_budget",
 				"type": "uint256"
 			},
 			{
 				"internalType": "uint256",
-				"name": "_budget",
+				"name": "_deadline",
 				"type": "uint256"
 			},
 			{
@@ -510,7 +499,13 @@
 			}
 		],
 		"name": "postJob",
-		"outputs": [],
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
 		"stateMutability": "payable",
 		"type": "function"
 	},
@@ -540,6 +535,24 @@
 		"name": "reviewWork",
 		"outputs": [],
 		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "_jobId",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "_applicationIndex",
+				"type": "uint256"
+			}
+		],
+		"name": "sendPaymentToApplicant",
+		"outputs": [],
+		"stateMutability": "payable",
 		"type": "function"
 	},
 	{
