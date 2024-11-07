@@ -32,36 +32,36 @@ const PostJob = ({ closeModal }) => {
                 alert('Please install MetaMask!');
                 return;
             }
-    
+
             const provider = new ethers.providers.Web3Provider(window.ethereum);
             const signer = provider.getSigner();
-    
-            const contractAddress = '0x0152D0a3Ef1efbD921E86ED14122055FA0843C5E'; // Replace with your contract address
-            const contract = new ethers.Contract(contractAddress, contractABI, signer);
-    
-            // Convert the budget from Ether to Wei
-            // const budgetInWei = ethers.utils.parseEther(budget);
 
-            // const targetInWei = ethers.utils.parseUnits(budget, 'ether');
-            console.log(deadline)
-            console.log(budget)
+            const contractAddress = '0xa32A74F7Cfe43f481dC08FE84575269DaEC89ccd'; // Replace with your contract address
+            const contract = new ethers.Contract(contractAddress, contractABI, signer);
+
+            // Convert the budget from Ether to Wei
+            const budgetInWei = ethers.utils.parseEther(budget.toString());
+
+            console.log('Posting job with budget:', budgetInWei);
             const tx = await contract.postJob(
                 title, 
                 shortDescription, 
                 detailedDescription, 
-                budget, // Pass the converted budget in Wei
+                budgetInWei, // Use the converted budget in Wei
                 Math.floor(new Date(deadline).getTime() / 1000),
                 image, 
                 workUrl,
-                // { gasLimit: 8000000 } 
+                {
+                    gasLimit: 8000000 // Set a gas limit (adjust the value based on your contract)
+                }
             );
 
             await tx.wait(); // Wait for the transaction to be mined
-    
+
             console.log('Job posted successfully', tx);
             closeModal();
         } catch (error) {
-            alert("Failes To Post")
+            alert("Failed To Post");
             console.log('Error posting job:', error);
         }
     };

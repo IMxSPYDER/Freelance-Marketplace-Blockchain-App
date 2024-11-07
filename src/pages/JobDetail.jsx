@@ -1,4 +1,3 @@
-// JobDetail.jsx
 import React, { useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { ethers } from 'ethers';
@@ -15,7 +14,7 @@ const JobDetail = () => {
     const [name, setName] = useState("");
     const [previousWorkLink, setPreviousWorkLink] = useState("");
     const [projectLink, setProjectLink] = useState("");
-    const contractAddress = '0x0152D0a3Ef1efbD921E86ED14122055FA0843C5E'; // Replace with actual contract address
+    const contractAddress = '0xa32A74F7Cfe43f481dC08FE84575269DaEC89ccd'; // Replace with actual contract address
 
     // Fetch job details from contract
     useEffect(() => {
@@ -26,22 +25,28 @@ const JobDetail = () => {
                     const contract = new ethers.Contract(contractAddress, contractABI, provider);
 
                     const jobs = await contract.getJobs();
-                    const jobData = jobs[jobId];
+                    const jobData = jobs[jobId]; // Get the job at the specific jobId index
                     
                     if (jobData) {
+                        // Check and convert BigNumber values correctly
+                        const jobId = jobData.jobId ? jobData.jobId.toNumber() : null;
+                        const deadline = jobData.deadline ? jobData.deadline.toNumber() : null;
+
                         setJob({
-                            jobId: jobData.jobId.toNumber(),
+                            jobId: jobId,
                             jobPoster: jobData.jobPoster,
                             title: jobData.title,
                             shortDescription: jobData.shortDescription,
                             detailedDescription: jobData.detailedDescription,
-                            budget: ethers.utils.formatEther(jobData.budget),
-                            deadline: jobData.deadline,
+                            budget: ethers.utils.formatEther(jobData.budget), // Convert from BigNumber to readable format
+                            deadline: deadline ? new Date(deadline * 1000).toLocaleDateString() : 'No deadline',
                             image: jobData.image,
                             workUrl: jobData.workUrl,
                             isCompleted: jobData.isCompleted,
                             isApproved: jobData.isApproved,
                         });
+                    } else {
+                        console.error(`Job with ID ${jobId} not found`);
                     }
                 }
             } catch (error) {
@@ -75,7 +80,7 @@ const JobDetail = () => {
                 const signer = provider.getSigner();
                 const contract = new ethers.Contract(contractAddress, contractABI, signer);
 
-                const tx = await contract.applyForJob(job.jobId, name, previousWorkLink, projectLink);
+                const tx = await contract.applyForJob(jobId, name, previousWorkLink, projectLink);
                 await tx.wait(); // Wait for the transaction to be mined
 
                 alert("Application submitted successfully!");
@@ -86,6 +91,8 @@ const JobDetail = () => {
             alert("Failed to submit application.");
         }
     };
+
+    
 
     if (!job) return <p>Loading...</p>;
 
@@ -105,7 +112,7 @@ const JobDetail = () => {
                     <div className='w-[40%] flex flex-col gap-5'>
                         <div className='h-[50%]'>
                             <p className="text-gray-700 mb-4"><strong>Budget:</strong> {job.budget} ETH</p>
-                            <p className="text-gray-700 mb-6"><strong>Deadline:</strong> {new Date(job.deadline * 1000).toLocaleDateString()}</p>
+                            <p className="text-gray-700 mb-6"><strong>Deadline:</strong> {job.deadline}</p>
                         </div>
                         <div className='flex items-center justify-center gap-3 h-[10%]'>
                             <button

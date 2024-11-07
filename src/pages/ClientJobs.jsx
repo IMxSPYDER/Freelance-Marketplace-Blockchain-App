@@ -1,4 +1,3 @@
-// ClientJobs.jsx
 import React, { useState, useEffect } from 'react';
 import { ethers } from 'ethers';
 import contractABI from '../Web3/FreelanceMarketplace.json';
@@ -7,7 +6,7 @@ import JobCard_FC from '../components/JobCard_FC';
 const ClientJobs = () => {
     const [jobs, setJobs] = useState([]);
     const [account, setAccount] = useState("");
-    const contractAddress = '0x0152D0a3Ef1efbD921E86ED14122055FA0843C5E';
+    const contractAddress = '0xa32A74F7Cfe43f481dC08FE84575269DaEC89ccd'; // Ensure this is a valid Ethereum address
 
     const requestAccount = async () => {
         if (window.ethereum) {
@@ -23,18 +22,31 @@ const ClientJobs = () => {
 
             try {
                 const jobsArray = await contract.getJobsByPoster(account);
-                const formattedJobs = jobsArray.map(job => ({
-                    jobId: job.jobId.toNumber(),
-                    title: job.title,
-                    shortDescription: job.shortDescription,
-                    detailedDescription: job.detailedDescription,
-                    budget: ethers.utils.formatEther(job.budget),
-                    deadline: job.deadline.toNumber(),
-                    image: job.image,
-                    isCompleted: job.isCompleted,
-                    isApproved: job.isApproved
-                }));
-                setJobs(formattedJobs);
+                console.log('Fetched jobs array:', jobsArray);
+
+                const formattedJobs = jobsArray.map((job, index) => {
+                    // Check if the required fields are present before mapping
+                    // if (!job.jobId || !job.deadline || !job.budget) {
+                    //     console.warn(`Job data missing for index ${index}:`, job);
+                    //     return null; // Skip jobs with missing essential data
+                    // }
+
+                    // Map the job data, handling BigNumbers correctly
+                    return {
+                        jobId: index,  // Ensure we handle BigNumber correctly
+                        title: job.title,
+                        shortDescription: job.shortDescription,
+                        detailedDescription: job.detailedDescription,
+                        budget: job.budget ? ethers.utils.formatEther(job.budget.toString()) : '0', // Handle BigNumber correctly
+                        deadline: job.deadline ? job.deadline.toNumber() : 'N/A', // Handle deadline
+                        image: job.image,
+                        isCompleted: job.isCompleted,
+                        isApproved: job.isApproved
+                    };
+                }).filter(job => job !== null); // Remove null entries (if any)
+
+                console.log('Formatted jobs:', formattedJobs);
+                setJobs(formattedJobs); // Update the state with the formatted job data
             } catch (error) {
                 console.error("Error fetching jobs:", error);
             }
