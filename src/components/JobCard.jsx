@@ -15,7 +15,7 @@ const JobCard = ({ job }) => {
         return `${msg.slice(0, 30)}...Read More`;
     };
     
-    // const remainingDays = daysLeft(job.deadline);
+    const remainingDays = daysLeft(job.deadline);
     // console.log(job.deadline);
 
     let formattedBudget;
@@ -50,7 +50,7 @@ const JobCard = ({ job }) => {
                     <h2 className="text-md font-bold text-gray-800 mb-2">{job.title}</h2>
                     <p className="text-gray-600 font-normal mb-1"><strong>Description:</strong> {formatAccount(job.shortDescription)}</p>
                     <p className="text-gray-600 mb-1"><strong>Budget:</strong> {job.budget} ETH</p>
-                    <p className="text-gray-600 mb-4"><strong>Deadline:</strong> {formattedDate} Days left</p>
+                    <p className="text-gray-600 mb-4"><strong>Deadline:</strong> {remainingDays} Day's Left </p>
                 </div>
                 <div className='h-[10%]'>
                     <button className="w-full bottom-1 bg-blue-500 text-white py-2 px-4 rounded-md font-medium hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 transition">

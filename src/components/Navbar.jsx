@@ -24,11 +24,11 @@ const Navbar = ({ account, connectWallet }) => {
             <span className="font-bold">Block<span className='text-blue-500'>Hir</span>e</span>
         </Link>
         <div className="flex space-x-4 border border-gray-200 rounded-lg  px-3 py-1  bg-white/80">
-          <Link to="/yourjobs" className="text-gray-700 p-2 px-3 hover:bg-gray-100 font-medium rounded-md">Product</Link>
-          <Link to="/find-job" className="text-gray-700 p-2 px-3 hover:bg-gray-100 font-medium rounded-md">Solutions</Link>
-          <Link to="/applied_jobs" className="text-gray-700 p-2 px-3 hover:bg-gray-100 font-medium rounded-md">Resources</Link>
+          <Link to="/yourjobs" className="text-gray-700 p-2 px-3 hover:bg-gray-100 font-medium rounded-md">My Jobs</Link>
+          <Link to="/find-job" className="text-gray-700 p-2 px-3 hover:bg-gray-100 font-medium rounded-md">Explore Jobs</Link>
+          <Link to="/applied_jobs" className="text-gray-700 p-2 px-3 hover:bg-gray-100 font-medium rounded-md">My Applications</Link>
           <Link to="/pricing" className="text-gray-700 p-2 px-3 hover:bg-gray-100 font-medium rounded-md">Pricing</Link>
-          <Link to="" className="text-gray-700 p-2 px-3 hover:bg-gray-100 font-medium rounded-md">Enterprise</Link>
+          <Link to="" className="text-gray-700 p-2 px-3 hover:bg-gray-100 font-medium rounded-md">Settings</Link>
         </div>
       </div>
       
