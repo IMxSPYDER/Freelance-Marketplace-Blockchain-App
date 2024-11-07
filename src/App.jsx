@@ -24,7 +24,7 @@ import AppliedJobs from './pages/AppliedJobs';
 const App = () => {
   const [account, setAccount] = useState(null);
 
-  const contractAddress = '0x0152D0a3Ef1efbD921E86ED14122055FA0843C5E'; // Replace with your contract address
+  const contractAddress = '0x867220ceAF07B3159f3AB66d4d6FD20f7cEdEcF4'; // Replace with your contract address
   
 
   // Function to connect wallet and prompt account selection
